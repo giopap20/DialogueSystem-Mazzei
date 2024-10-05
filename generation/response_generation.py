@@ -1,3 +1,5 @@
+from dm.frames import PosTaggingFrame, TokenizationFrame, NamedEntityRecognitionFrame
+
 def generate_response(evaluation, retries, is_last_question=False):
     if not evaluation["matched_keywords"]:
         return "I'm sorry, I didn't quite understand your answer. Please try to include the relevant key points."
@@ -16,3 +18,26 @@ def generate_adaptive_help(retries):
         return "Consider reviewing the key concepts of the topic."
     return ""
 
+def generate_sentence_plan(frame):
+    """
+    Genera un piano di frase basato sui frame.
+    Questo può essere utilizzato per personalizzare ulteriormente la risposta.
+    """
+    sentence_plan = []
+    if isinstance(frame, PosTaggingFrame):
+        sentence_plan = [
+            "What is the technique for POS tagging?",
+            "Can you explain the categories involved?",
+            "How do you perform disambiguation?"
+        ]
+    elif isinstance(frame, TokenizationFrame):
+        sentence_plan = [
+            "What does segmentation mean in tokenization?",
+            "Can you describe the different units used?"
+        ]
+    elif isinstance(frame, NamedEntityRecognitionFrame):
+        sentence_plan = [
+            "What methods can be used to identify entities?",
+            "How do you classify names, places, and organizations?"
+        ]
+    return sentence_plan
