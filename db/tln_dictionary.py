@@ -3,10 +3,10 @@ questions_with_keywords = {
     "What is POS tagging?": {
         'keywords': ['technique', 'disambiguation', 'categories', 'words', 'assigning'],
         'sentence_plan': {
-            'subject': 'POS tagging',
+            'subject': 'tagging',
             'verb': 'is',
             'object': 'technique',
-            'modifiers': ['used for disambiguation', 'assigning them to categories']  # Questo include frasi che contengono le keyword
+            'modifiers': ['POS tagging']  # Questo include frasi che contengono le keyword
 }
 
 

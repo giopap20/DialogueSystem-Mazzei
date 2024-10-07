@@ -8,9 +8,9 @@ def main():
 
     while dm.has_more_questions():
         question = dm.ask_question()
-        print(f"Question: {question}")
+        print(f"Prof: {question}")
 
-        user_input = input("Your answer: ")
+        user_input = input("Student: ")
 
         response = dm.process_answer(user_input)
         print(response)

@@ -1,5 +1,5 @@
 from analysis.language_understanding import evaluate_answer
-from generation.response_generation import generate_response
+from generation.response_generation import generate_feedback
 from dm.frames import PosTaggingFrame, TokenizationFrame, NamedEntityRecognitionFrame
 from db.tln_dictionary import questions_with_keywords
 
@@ -41,7 +41,7 @@ class DialogManager:
 
         # Valuta la risposta dell'utente
         evaluation = evaluate_answer(user_input, keywords, sentence_plan)
-        response = generate_response(evaluation, self.retries, self.current_question_index == len(self.questions) - 1)
+        response = generate_feedback(evaluation, self.retries, self.current_question_index == len(self.questions) - 1)
 
         # Punteggio iniziale
         score = 30

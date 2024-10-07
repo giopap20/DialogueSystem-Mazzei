@@ -28,7 +28,7 @@ def evaluate_sentence_plan(doc, sentence_plan):
         print(f"Token: {token.text}, Dep: {token.dep_}, Lemma: {token.lemma_}")  # Debugging
 
         # Controlla il soggetto
-        if token.dep_ == "nsubj":
+        if token.dep_ in {"nsubj"}:
             # Controlla il soggetto considerando i lemmi
             subject = token.lemma_.lower() == sentence_plan['subject'].lower()
 
@@ -39,23 +39,14 @@ def evaluate_sentence_plan(doc, sentence_plan):
                 verb = True
 
         # Controlla l'oggetto
-        if (token.dep_ == "dobj" or token.dep_ == "pobj") and token.lemma_.lower() == sentence_plan['object'].lower():
+        if token.dep_ in {"dobj", "pobj", "attr"} and token.lemma_.lower() == sentence_plan['object'].lower():
             object_ = True
 
-    # Controlla i modificatori con le regex
-    modifiers = sentence_plan.get('modifiers', [])
-    if modifiers:  # Solo se ci sono modificatori
-        modifiers_pattern = r'\b(?:' + '|'.join(re.escape(modifier) for modifier in modifiers) + r')\b'
-        modifiers_present = any(
-            re.search(modifiers_pattern, doc.text) for modifier in modifiers
-        )
-
     # Debugging finale
-    print(f"Subject: {subject}, Verb: {verb}, Object: {object_}, Modifiers present: {modifiers_present}")
+    print(f"Subject: {subject}, Verb: {verb}, Object: {object_}")
 
     # Restituisce True solo se soggetto, verbo, oggetto e (se presenti) modificatori sono soddisfatti
-    return subject and verb and object_ and (not modifiers or modifiers_present)
-
+    return subject and verb and object_
 
 
 
@@ -78,7 +69,7 @@ def evaluate_answer(user_input, keywords, sentence_plan=None):
     # Aggiungi controllo della struttura (Sentence-Plan) se fornito
     sentence_structure_correct = False
     if sentence_plan:
-        sentence_structure_correct = evaluate_sentence_plan(doc, sentence_plan, keywords)
+        sentence_structure_correct = evaluate_sentence_plan(doc, sentence_plan)
 
     print("Matched Keywords:", matched_keywords)
     print("Keywords:", keywords)

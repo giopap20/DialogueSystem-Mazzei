@@ -1,15 +1,38 @@
 from dm.frames import PosTaggingFrame, TokenizationFrame, NamedEntityRecognitionFrame
+from simplenlg.realiser.english import Realiser
+from simplenlg.framework import NLGFactory
 
-def generate_response(evaluation, retries, is_last_question=False):
-    if not evaluation["matched_keywords"]:
-        return "I'm sorry, I didn't quite understand your answer. Please try to include the relevant key points."
-    elif evaluation["is_correct"]:
-        return "Correct! You covered all the necessary points." + ("" if is_last_question else " Let's move on to the next question.")
+
+realiser = Realiser()
+nlgFactory = NLGFactory()
+
+
+def generate_feedback(evaluation, retries, is_last_question=False):
+    # Creazione della frase con SimpleNLG
+    phrase = nlgFactory.createClause()
+
+    if evaluation["is_correct"]:
+        phrase.setSubject("Your answer")
+        phrase.setVerb("is")
+        phrase.setObject("completely correct")
     elif evaluation["is_partially_correct"]:
-        help_message = generate_adaptive_help(retries)
-        return f"Partially correct. Your answer is incomplete. {help_message}"
+        phrase.setSubject("Your answer")
+        phrase.setVerb("is")
+        phrase.setObject("partially correct")
+        phrase.addComplement("but it could be improved")
     else:
-        return f"Incorrect. Try to include details about: {', '.join(evaluation['keywords'])}."
+        phrase.setSubject("Your answer")
+        phrase.setVerb("is")
+        phrase.setObject("incorrect")
+        phrase.addComplement("please try again")
+
+    # Debugging: Print the phrase components
+    print(f"Subject: {phrase.getSubject()}")
+    print(f"Verb: {phrase.getVerb()}")
+    print(f"Object: {phrase.getObject()}")
+
+    return realiser.realiseSentence(phrase)
+
 
 def generate_adaptive_help(retries):
     if retries == 1:
