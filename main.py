@@ -1,17 +1,25 @@
 from dm.dialog_manager import DialogManager
-
+from dm.frames import Frame
 
 def main():
     dm = DialogManager()
 
-    print("Welcome to the NLP Quiz!")
+    if dm.frame.get_student_name() == "":
+        print(f"Prof Danny: {dm.first_interaction()}")
+        student_name = input("Student: ")
+        dm.frame.set_student_name(student_name)
+
+        print(f"Prof Danny: {dm.first_interaction()}")
+        answer = input("Student: ").strip().lower()
+        if not answer in {"yes", "sure", "ok", "yep", "yeah", "y", "of course", "absolutely", "maybe"}:
+            return None
+
 
     while dm.has_more_questions():
         question = dm.ask_question()
-        print(f"Prof: {question}")
+        print(f"Prof Danny: {question}")
 
         user_input = input("Student: ")
-
         response = dm.process_answer(user_input)
         print(response)
 

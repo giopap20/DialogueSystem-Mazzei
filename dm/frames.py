@@ -1,32 +1,38 @@
+import random
+
+from db.tln_dictionary import questions
+
+
 class Frame:
-    def __init__(self, keywords) -> None:
-        self.keywords = keywords
-        self._keywords = [None] * len(keywords)  # Cambiato per adattarsi al numero di keywords
+    def __init__(self) -> None:
+        self.student_name = ""
+        self.retries = 0
+        self.questions = random.sample(list(questions.keys()), 3)
+        self.questions_type = ""
+        self.correct_answer = []
 
-    def fill(self, keywords_found):
-        for i, keyword in enumerate(keywords_found, start=0):
-            if i < len(self._keywords):  # Assicurati di non andare oltre il numero di keywords
-                self._keywords[i] = keyword
 
-    def completeness_score(self):
-        filled_keywords = [k for k in self._keywords if k is not None]
-        return len(filled_keywords) / len(self._keywords)  # Modificato per usare il numero di keywords
+    def set_student_name(self, student_name):
+        self.student_name = student_name
 
-class PosTaggingFrame(Frame):
-    name = 'pos tagging'
+    def set_retries(self, retries):
+        self.retries = retries
 
-    def __init__(self, keywords) -> None:
-        super().__init__(keywords)  # Passa le keywords al costruttore della classe base
+    def set_answer(self, correct_answer):
+        self.correct_answer = correct_answer
 
-class TokenizationFrame(Frame):
-    name = 'tokenization'
+    def get_answer(self):
+        return self.correct_answer
 
-    def __init__(self, keywords) -> None:
-        super().__init__(keywords)
+    def get_student_name(self):
+        return self.student_name
 
-class NamedEntityRecognitionFrame(Frame):
-    name = 'named entity recognition'
+    def get_retries(self):
+        return self.retries
 
-    def __init__(self, keywords) -> None:
-        super().__init__(keywords)
+    def get_questions(self, current_index):
+        return self.questions[current_index]
+
+
+
 

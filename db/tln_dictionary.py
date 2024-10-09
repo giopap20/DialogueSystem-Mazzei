@@ -1,34 +1,24 @@
 # Mappa di domande con le parole chiave attese (Text-Plan) e la struttura della frase (Sentence-Plan)
-questions_with_keywords = {
+questions = {
     "What is POS tagging?": {
-        'keywords': ['technique', 'disambiguation', 'categories', 'words', 'assigning'],
-        'sentence_plan': {
-            'subject': 'tagging',
-            'verb': 'is',
-            'object': 'technique',
-            'modifiers': ['POS tagging']  # Questo include frasi che contengono le keyword
-}
-
-
-
+        'correct_answer': "Pos tagging is a technique for disambiguation of words assigning them to categories",
+        'type': "definition",
     },
     "What is tokenization in NLP?": {
-        'keywords': ['segmenting', 'text', 'words', 'sub-words', 'units'],
-        'sentence_plan': {
-            'subject': 'tokenization',
-            'verb': 'segment',
-            'object': 'words',
-            'additional_info': ['in NLP']  # Aggiunto per contenere informazioni aggiuntive
-        }
+        'correct_answer': "Tokenization is the process of breaking down text into smaller units called tokens. ",
+        'type': "definition",
     },
-    "What are named entity recognitions?": {
-        'keywords': ['identify', 'entities', 'names', 'places', 'organizations'],
-        'sentence_plan': {
-            'subject': 'entity recognition',
-            'verb': 'identify',
-            'object': 'entities',
-            'additional_info': []  # Aggiunto per contenere informazioni aggiuntive
-        }
+    "What are NLG task?": {
+        'correct_answer': "content determination, discourse planning, sentence aggregation",
+        'type': "list",
+    },
+    "Where are natural languages located in the Chomsky Hierarchy?": {
+        'correct_answer': "mildly context sensitive",
+        'type': "single",
+    },
+    "What are the 6 remarkable phenomena of human dialogue?": {
+        'correct_answer': "turns, speech acts, grounding, dialogue structure, initiative, implicature",
+        'type': "list",
     }
 }
 
