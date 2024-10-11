@@ -4,8 +4,10 @@ import spacy
 import re
 
 from nltk import WordNetLemmatizer, word_tokenize
-from nltk.corpus import wordnet, stopwords
+from nltk.corpus import wordnet, stopwords, words
 import Levenshtein as lev
+
+from db.tln_dictionary import questions
 
 # Carica il modello di spaCy per l'inglese
 nlp = spacy.load('en_core_web_md')
@@ -41,13 +43,6 @@ def calculate_semantic_similarity(user_input, correct_answer):
     doc1 = nlp(user_input)
     doc2 = nlp(correct_answer)
 
-    # Check if tokens have vectors
-    print(all([token.has_vector for token in doc1]))
-    print(all([token.has_vector for token in doc2]))
-
-    print(doc1)
-    print(doc2)
-
     if all([token.has_vector for token in doc1]) and all([token.has_vector for token in doc2]):
         similarity = doc1.similarity(doc2)
     else:
@@ -58,20 +53,9 @@ def calculate_semantic_similarity(user_input, correct_answer):
 def calculate_syntactic_similarity(answer, reference):
     return 1 - lev.distance(answer, reference) / max(len(answer), len(reference))
 
-def dependency_similarity(answer, reference):
-    doc1 = nlp(answer)
-    doc2 = nlp(reference)
-
-    # Estrarre le dipendenze
-    deps1 = [(token.text, token.dep_) for token in doc1]
-    deps2 = [(token.text, token.dep_) for token in doc2]
-
-    # Compara le dipendenze
-    return len(set(deps1) & set(deps2)) / float(len(set(deps1) | set(deps2)))
-
 def combined_similarity(semantic_similarity, syntactic_similarity):
     # Pondera i punteggi come desideri; ad esempio, dando più peso alla similarità semantica
-    final_similarity = 0.7 * semantic_similarity + 0.3 * syntactic_similarity
+    final_similarity = 0.5 * semantic_similarity + 0.5 * syntactic_similarity
     return final_similarity
 
 # Funzione per verificare la struttura grammaticale
@@ -86,8 +70,6 @@ def check_grammar(user_input):
     has_adverbs = any(token.pos_ == 'ADV' for token in doc)
     has_prepositions = any(token.dep_ == 'prep' for token in doc)
 
-    for token in doc:
-        print(token.text, token.dep_, token.pos_, token.head.text)
 
     # Definisci una condizione di validità grammaticale basata su soggetto, verbo, e altre dipendenze
     is_grammatically_valid = (
@@ -96,18 +78,62 @@ def check_grammar(user_input):
             (has_object or has_adverbs or has_prepositions)
     )
 
-    print(has_subject, has_verb, has_object, has_adverbs, has_prepositions)
     return is_grammatically_valid
 
+def preprocess_text(text):
+    text = re.sub(r'\b(and|or)\b', ',', text)
+    return text
 
-def match_with_flexibility(token, keyword):
-    # Crea un pattern per catturare diverse forme della parola (es. run, running, ran)
-    keyword_pattern = rf'\b{keyword}(ing|ed|s)?\b'
-    return bool(re.search(keyword_pattern, token))
+def extract_keywords(text):
+    text = preprocess_text(text)
+    doc = nlp(text)
+
+    # Estrai noun chunks come potenziali frasi chiave
+    noun_chunks = [" ".join([lemmatize_with_pos(token) for token in chunk]) for chunk in doc.noun_chunks]
+
+    keywords = [lemmatize_with_pos(token) for token in doc if token.text.lower() not in stop and token.text not in punct]
+    combined_keywords = noun_chunks + keywords
+    return combined_keywords
+
+def keyword_match(user_input, keywords):
+    user_keywords = set(extract_keywords(user_input))
+
+    # Trova il numero di parole chiave che coincidono
+    matches = [kw for kw in user_keywords if kw in keywords]
+
+    total_keywords = len(keywords)
+
+    # Normalizza il punteggio delle parole chiave
+    keyword_similarity = len(matches) / total_keywords if total_keywords > 0 else 0
+    return keyword_similarity
+
+
+def lemmatize_with_pos(token):
+    # Mappa i tag POS di spaCy ai tag POS di WordNet
+    pos = token.pos_
+    if pos.startswith('V'):
+        return lemmatizer.lemmatize(token.text, wordnet.VERB)
+    elif pos.startswith('N'):
+        return lemmatizer.lemmatize(token.text, wordnet.NOUN)
+    elif pos.startswith('R'):
+        return lemmatizer.lemmatize(token.text, wordnet.ADV)
+    elif pos.startswith('J'):
+        return lemmatizer.lemmatize(token.text, wordnet.ADJ)
+    else:
+        return token.text  # Restituisce la parola originale se il POS non è utile
+
 
 # Funzione per valutare l'input dell'utente confrontandolo con le keyword (Text-Plan)
-def evaluate_answer(user_input, correct_answer, question_type):
-    # Pulizia dell'input
+def evaluate_answer(user_input, correct_answer, question_type, keywords):
+
+    if question_type == 'list':
+       keyword_similarity = keyword_match(user_input, keywords)
+       return {
+           "final_similarity": keyword_similarity,
+           "check_grammar": True
+       }
+
+   # Pulizia dell'input
     user_input_cleaned = clean_input(user_input.lower())
     correct_answer_cleaned = clean_input(correct_answer.lower())
 
@@ -119,18 +145,14 @@ def evaluate_answer(user_input, correct_answer, question_type):
     syntactic_similarity = calculate_syntactic_similarity(user_input_cleaned, correct_answer_cleaned)
     print(syntactic_similarity)
 
-    # Calcola similarità delle dipendenze
-    dep_similarity = dependency_similarity(user_input_cleaned, correct_answer_cleaned)
-    print(dep_similarity)
-
-    #Calcola la similarità combinata
+    # Calcola la similarità combinata
     final_similarity = combined_similarity(semantic_similarity, syntactic_similarity)
-    print(combined_similarity(semantic_similarity, syntactic_similarity))
+    print(final_similarity)
+
 
     return {
         "semantic_similarity": semantic_similarity,
         "syntactic_similarity": syntactic_similarity,
-        "dep_similarity": dep_similarity,
         "final_similarity": final_similarity,
         "check_grammar": check_grammar(user_input_cleaned) if question_type == 'definition' else True
     }

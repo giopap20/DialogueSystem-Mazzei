@@ -10,6 +10,7 @@ class Frame:
         self.questions = random.sample(list(questions.keys()), 3)
         self.questions_type = ""
         self.correct_answer = []
+        self.keywords = []
 
 
     def set_student_name(self, student_name):
