@@ -11,6 +11,7 @@ class Frame:
         self.questions_type = ""
         self.correct_answer = []
         self.keywords = []
+        self.user_answer = []
 
 
     def set_student_name(self, student_name):

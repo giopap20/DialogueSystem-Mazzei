@@ -1,6 +1,6 @@
 from analysis.language_understanding import evaluate_answer
 from generation.response_generation import greetings, intro, grammar_not_valid, response_correct, next_question, \
-    partial_correct_response, try_again, no_more_retries, incorrect_response
+    partial_correct_response, try_again, no_more_retries, incorrect_response, same_answer
 from dm.frames import Frame
 from db.tln_dictionary import questions
 
@@ -11,6 +11,7 @@ class DialogManager:
         self.scores = []
         self.frame = Frame()
         self.current_question_index = 0
+        self.current_question_score = 30
 
     def first_interaction(self):
         if self.frame.get_student_name() == "" :
@@ -29,19 +30,22 @@ class DialogManager:
 
     def process_answer(self, user_input):
         # Valuta la risposta dell'utente
-        evaluation = evaluate_answer(user_input, self.frame.correct_answer, self.frame.questions_type, self.frame.keywords)
+        self.frame.user_answer.append(user_input)
+        evaluation = evaluate_answer(self)
 
-        # Punteggio iniziale
-        score = 30
+        if evaluation["same_answer"]:
+            return same_answer()
+
         # Se la risposta è grammaticalmente errata
         if not evaluation["check_grammar"]:
             return grammar_not_valid()
 
         # Se la risposta è corretta
         if evaluation["final_similarity"] >= 0.8:
-            self.scores.append(score)  # Punteggio pieno
+            self.scores.append(self.current_question_score)  # Punteggio pieno
             self.frame.retries = 0
             self.current_question_index += 1
+            self.current_question_score = 30  # Reset del punteggio
             if self.current_question_index == len(self.frame.questions):
                 return response_correct()
             else:
@@ -50,32 +54,30 @@ class DialogManager:
         # Se la risposta è parzialmente errata
         self.frame.retries += 1
         if  0.6 <= evaluation["final_similarity"] < 0.8 :
-            score -= 2 * self.frame.retries  # Penalità progressiva
+            self.current_question_score -= 3 * self.frame.retries  # Penalità progressiva
             if self.frame.retries == 2:  # Troppi tentativi
-                self.scores.append(max(15, score))  # Valuta la risposta corrente
+                self.scores.append(self.current_question_score)  # Valuta la risposta corrente
                 self.current_question_index += 1
                 self.frame.retries = 0
+                self.current_question_score = 30
                 return partial_correct_response() + " " + no_more_retries()
             else:
-                return partial_correct_response() + " " + try_again()
+                return partial_correct_response() + " " + try_again() if self.current_question_index < len(self.frame.questions) else partial_correct_response()
         else:  # Risposta errata
-            score -= 5 * self.frame.retries  # Penalità progressiva
+            self.current_question_score -= 6 * self.frame.retries  # Penalità progressiva
             if self.frame.retries == 2:  # Troppi tentativi
-                self.scores.append(max(15, score))  # Valuta la risposta corrente
+                self.scores.append(self.current_question_score)  # Valuta la risposta corrente
                 self.current_question_index += 1
-                self.frame.retries = 0  # Reset dei retries
+                self.frame.retries = 0
+                self.current_question_score = 30
                 return incorrect_response() + " " + no_more_retries()
 
-        # Assicurati che il punteggio non scenda sotto 15
-        final_score = max(15, score)
-        self.scores.append(final_score)
-
-        return incorrect_response() + " " + try_again()
+        return incorrect_response() + " " + try_again() if self.current_question_index < len(self.frame.questions) else incorrect_response()
 
 
     def calculate_final_score(self):
         if self.scores:
-            average_score = (sum(self.scores) / len(self.scores))
+            average_score = int((sum(self.scores) / len(self.scores)))
             if average_score == 30:
                 return 32  # Assegna la lode se il punteggio medio è 30
             return average_score

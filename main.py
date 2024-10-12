@@ -27,7 +27,7 @@ def main():
     final_score = dm.calculate_final_score()
     if final_score < 18:
         print(f"{student_name}, Your final score is: {final_score}" + ". " + failed_exam())
-    elif 19 < final_score <= 25:
+    elif 18 <= final_score <= 25:
         print(f"{student_name}, Your final score is: {final_score}" + ". " + passed_exam())
     elif 26 <= final_score > 32:
         print(f"{student_name}, Your final score is: {final_score}" + ". " + good_exam())

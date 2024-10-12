@@ -6,6 +6,7 @@ import re
 from nltk import WordNetLemmatizer, word_tokenize
 from nltk.corpus import wordnet, stopwords, words
 import Levenshtein as lev
+from rapidfuzz.distance.Levenshtein_py import similarity
 
 from db.tln_dictionary import questions
 
@@ -104,7 +105,7 @@ def keyword_match(user_input, keywords):
     total_keywords = len(keywords)
 
     # Normalizza il punteggio delle parole chiave
-    keyword_similarity = len(matches) / total_keywords if total_keywords > 0 else 0
+    keyword_similarity = len(matches) / total_keywords
     return keyword_similarity
 
 
@@ -124,35 +125,44 @@ def lemmatize_with_pos(token):
 
 
 # Funzione per valutare l'input dell'utente confrontandolo con le keyword (Text-Plan)
-def evaluate_answer(user_input, correct_answer, question_type, keywords):
+def evaluate_answer(self):
 
-    if question_type == 'list':
-       keyword_similarity = keyword_match(user_input, keywords)
+    # Controlla se l'utente ha risposto ugualmente rispetto a prima
+    if self.frame.retries > 0 and self.frame.user_answer[-1] == self.frame.user_answer[-2]:
+        return {
+            "same_answer": True
+        }
+
+    # Se la domanda è di tipo "list", confronta le parole chiave
+    if self.frame.questions_type == 'list':
+       keyword_similarity = keyword_match(self.frame.user_answer[-1], self.frame.keywords)
        return {
-           "final_similarity": keyword_similarity,
-           "check_grammar": True
-       }
+           "final_similarity": keyword_similarity if keyword_similarity > 0.6 else 0,
+           "check_grammar": True,
+           "same_answer": False
+         }
 
-   # Pulizia dell'input
-    user_input_cleaned = clean_input(user_input.lower())
-    correct_answer_cleaned = clean_input(correct_answer.lower())
+    # Pulizia dell'input
+    user_input_cleaned = clean_input(self.frame.user_answer[-1].lower())
+    correct_answer_cleaned = clean_input(self.frame.correct_answer.lower())
 
     # Calcola la similarità semantica tra la risposta corretta e quella fornita
     semantic_similarity = calculate_semantic_similarity(user_input_cleaned, correct_answer_cleaned)
-    print(semantic_similarity)
+    #print(semantic_similarity)
 
     # Calcola similarità sintattica
     syntactic_similarity = calculate_syntactic_similarity(user_input_cleaned, correct_answer_cleaned)
-    print(syntactic_similarity)
+    #print(syntactic_similarity)
 
     # Calcola la similarità combinata
     final_similarity = combined_similarity(semantic_similarity, syntactic_similarity)
-    print(final_similarity)
+    #print(final_similarity)
 
 
     return {
+        "same_answer": False,
         "semantic_similarity": semantic_similarity,
         "syntactic_similarity": syntactic_similarity,
         "final_similarity": final_similarity,
-        "check_grammar": check_grammar(user_input_cleaned) if question_type == 'definition' else True
+        "check_grammar": check_grammar(user_input_cleaned) if self.frame.questions_type == 'definition' else True
     }

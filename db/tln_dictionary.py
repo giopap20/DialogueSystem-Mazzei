@@ -17,8 +17,8 @@ questions = {
     },
     "Where are natural languages located in the Chomsky Hierarchy?": {
         'correct_answer': "mildly context sensitive",
-        'type': "single",
-        'keywords': ["mildly context sensitive"]
+        'type': "list",
+        'keywords': ["mildly", "context", "sensitive"]
     },
     "What are the 6 remarkable phenomena of human dialogue?": {
         'correct_answer': "turns, speech acts, grounding, dialogue structure, initiative, implicature",

@@ -218,10 +218,17 @@ def passed_exam():
     verb_1.addComplement("well")
     s_1 = nlg_factory.createClause(subj_1, verb_1)
 
+
     subj_2 = nlg_factory.createNounPhrase("you")
     verb_2 = nlg_factory.createVerbPhrase("can")
-    verb_2.addComplement(nlg_factory.createVerbPhrase("aim"))
-    verb_2.getComplement(0).addComplement("higher")
+
+
+    aim_verb = nlg_factory.createVerbPhrase("aim")
+    aim_verb.setFeature(Feature.FORM, "base")
+
+    verb_2.addComplement(aim_verb)
+    aim_verb.addComplement("higher")
+
     s_2 = nlg_factory.createClause(subj_2, verb_2)
 
     coord = nlg_factory.createCoordinatedPhrase()
@@ -229,7 +236,9 @@ def passed_exam():
     coord.addCoordinate(s_1)
     coord.addCoordinate(s_2)
 
-    return realiser.realiseSentence(coord)
+    output = realiser.realiseSentence(coord)
+
+    return output
 
 def good_exam():
     subj = nlg_factory.createNounPhrase("you")
@@ -260,7 +269,6 @@ def best_exam():
 
 
 def try_again():
-
     verb_2 = nlg_factory.createVerbPhrase("try")
     verb_2.addComplement("again")
     verb_2.setFeature(Feature.FORM, "imperative")
@@ -283,7 +291,8 @@ def next_question():
 def no_more_retries():
     subj = nlg_factory.createNounPhrase("we")
     modal = nlg_factory.createVerbPhrase("should")
-    verb = nlg_factory.createVerbPhrase("try")  # Verbo: "try"
+    verb = nlg_factory.createVerbPhrase("try")
+    verb.setFeature(Feature.FORM, "base")
     obj = nlg_factory.createNounPhrase("another", "question")
     verb.addComplement(obj)
     modal.addComplement(verb)
@@ -293,11 +302,15 @@ def no_more_retries():
     return realiser.realiseSentence(s)
 
 
+def same_answer():
+    subj = nlg_factory.createNounPhrase("you")
+    verb = nlg_factory.createVerbPhrase("say")
+    verb.setFeature(Feature.TENSE, "past")  # Passato
+    obj = nlg_factory.createNounPhrase("that")
+
+    s = nlg_factory.createClause(subj, verb, obj)
+    s.addComplement(nlg_factory.createAdverbPhrase("already"))
+
+    return realiser.realiseSentence(s)
 
 
-def generate_adaptive_help(retries):
-    if retries == 1:
-        return "Here's a hint: Think about the main techniques involved."
-    elif retries == 2:
-        return "Consider reviewing the key concepts of the topic."
-    return ""
