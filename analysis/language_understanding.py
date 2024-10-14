@@ -11,7 +11,7 @@ from rapidfuzz.distance.Levenshtein_py import similarity
 from db.tln_dictionary import questions
 
 # Carica il modello di spaCy per l'inglese
-nlp = spacy.load('en_core_web_md')
+nlp = spacy.load('en_core_web_lg')
 
 stop = stopwords.words('english')
 punct = string.punctuation + '’'
@@ -43,7 +43,6 @@ def is_synonym(word, keyword):
 def calculate_semantic_similarity(user_input, correct_answer):
     doc1 = nlp(user_input)
     doc2 = nlp(correct_answer)
-
     if all([token.has_vector for token in doc1]) and all([token.has_vector for token in doc2]):
         similarity = doc1.similarity(doc2)
     else:
@@ -67,16 +66,15 @@ def check_grammar(user_input):
     # Controlli sulle dipendenze principali
     has_subject = any(token.dep_ == 'nsubj' for token in doc)
     has_verb = any(token.dep_ == 'ROOT' for token in doc)
-    has_object = any(token.dep_ in ['dobj', 'pobj'] for token in doc)
-    has_adverbs = any(token.pos_ == 'ADV' for token in doc)
-    has_prepositions = any(token.dep_ == 'prep' for token in doc)
-
+    # has_object = any(token.dep_ in ['dobj', 'pobj'] for token in doc)
+    # has_adverbs = any(token.pos_ == 'ADV' for token in doc)
+    # has_prepositions = any(token.dep_ == 'prep' for token in doc)
 
     # Definisci una condizione di validità grammaticale basata su soggetto, verbo, e altre dipendenze
     is_grammatically_valid = (
             has_subject and
-            has_verb and
-            (has_object or has_adverbs or has_prepositions)
+            has_verb
+           # (has_object or has_adverbs or has_prepositions)
     )
 
     return is_grammatically_valid
@@ -137,24 +135,20 @@ def evaluate_answer(self):
     if self.frame.questions_type == 'list':
        keyword_similarity = keyword_match(self.frame.user_answer[-1], self.frame.keywords)
        return {
-           "final_similarity": keyword_similarity if keyword_similarity > 0.6 else 0,
+           "final_similarity": keyword_similarity,
            "check_grammar": True,
            "same_answer": False
          }
 
-    # Pulizia dell'input
     user_input_cleaned = clean_input(self.frame.user_answer[-1].lower())
     correct_answer_cleaned = clean_input(self.frame.correct_answer.lower())
 
-    # Calcola la similarità semantica tra la risposta corretta e quella fornita
     semantic_similarity = calculate_semantic_similarity(user_input_cleaned, correct_answer_cleaned)
     #print(semantic_similarity)
 
-    # Calcola similarità sintattica
     syntactic_similarity = calculate_syntactic_similarity(user_input_cleaned, correct_answer_cleaned)
     #print(syntactic_similarity)
 
-    # Calcola la similarità combinata
     final_similarity = combined_similarity(semantic_similarity, syntactic_similarity)
     #print(final_similarity)
 

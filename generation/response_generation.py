@@ -255,16 +255,11 @@ def best_exam():
     obj_1 = nlg_factory.createNounPhrase("some", "thesis projects")
     s_1 = nlg_factory.createClause(subj_1, verb_1, obj_1)
 
+    # Aggiungere la frase preposizionale "for you"
     prep = nlg_factory.createPrepositionPhrase("for", "you")
-    verb_2 = nlg_factory.createVerbPhrase("work")
-    verb_2.addComplement("on")
-    prep.addComplement(verb_2)
-
-    if_clause = nlg_factory.createClause("you", "want")
-    if_clause.setFeature(Feature.INTERROGATIVE_TYPE, nlg.InterrogativeType.YES_NO)
     s_1.addPostModifier(prep)
-    s_1.addPostModifier(if_clause)
 
+    # Realizzare la frase finale
     return realiser.realiseSentence(s_1)
 
 

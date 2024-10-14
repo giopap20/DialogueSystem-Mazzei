@@ -53,7 +53,7 @@ class DialogManager:
 
         # Se la risposta è parzialmente errata
         self.frame.retries += 1
-        if  0.6 <= evaluation["final_similarity"] < 0.8 :
+        if  (0.6 <= evaluation["final_similarity"] < 0.8 and self.frame.questions_type == 'definition') or (evaluation["final_similarity"] > 0 and self.frame.questions_type == 'list'):
             self.current_question_score -= 3 * self.frame.retries  # Penalità progressiva
             if self.frame.retries == 2:  # Troppi tentativi
                 self.scores.append(self.current_question_score)  # Valuta la risposta corrente
@@ -76,6 +76,7 @@ class DialogManager:
 
 
     def calculate_final_score(self):
+        print(self.scores)
         if self.scores:
             average_score = int((sum(self.scores) / len(self.scores)))
             if average_score == 30:
