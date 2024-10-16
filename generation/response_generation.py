@@ -57,6 +57,17 @@ def intro():
     output = output.replace(". are", ". Are")
     return output
 
+def english_not_valid():
+    subj_1 = nlg_factory.createNounPhrase("I")
+    verb_1 = nlg_factory.createVerbPhrase("understand")
+    verb_1.setFeature(Feature.TENSE, Tense.PAST)
+    verb_1.setFeature(Feature.NEGATED, True)
+    obj_1 = nlg_factory.createNounPhrase("you")
+    s_1 = nlg_factory.createClause(subj_1, verb_1, obj_1)
+    output = realiser.realiseSentence(s_1)
+
+    return output
+
 def grammar_not_valid():
     subj_1 = nlg_factory.createNounPhrase("Your", "answer")
     verb_1 = nlg_factory.createVerbPhrase("be")
@@ -286,7 +297,7 @@ def no_more_retries():
 def same_answer():
     subj = nlg_factory.createNounPhrase("you")
     verb = nlg_factory.createVerbPhrase("say")
-    verb.setFeature(Feature.TENSE, "past")  # Passato
+    verb.setFeature(Feature.TENSE, "past")
     obj = nlg_factory.createNounPhrase("that")
 
     s = nlg_factory.createClause(subj, verb, obj)

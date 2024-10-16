@@ -1,6 +1,6 @@
 from analysis.language_understanding import evaluate_answer
 from generation.response_generation import greetings, intro, grammar_not_valid, correct_response, next_question, \
-    partial_correct_response, try_again, no_more_retries, incorrect_response, same_answer
+    partial_correct_response, try_again, no_more_retries, incorrect_response, same_answer, english_not_valid
 from dm.frames import Frame
 from db.tln_dictionary import questions
 
@@ -31,6 +31,9 @@ class DialogManager:
     def process_answer(self, user_input):
         self.frame.user_answer.append(user_input)
         evaluation = evaluate_answer(self)
+
+        if not evaluation["is_english"]:
+            return english_not_valid()
 
         if evaluation["same_answer"]:
             return same_answer()

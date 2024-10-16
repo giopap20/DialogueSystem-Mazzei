@@ -3,10 +3,10 @@ import string
 import spacy
 import re
 
-from nltk import WordNetLemmatizer
-from nltk.corpus import wordnet, stopwords
+from nltk import WordNetLemmatizer, word_tokenize
+from nltk.corpus import wordnet, stopwords, words
 import Levenshtein as lev
-
+from sympy.physics.units import length
 
 nlp = spacy.load('en_core_web_lg')
 
@@ -22,6 +22,11 @@ def clean_input(text):
     # Rimuovi spazi multipli
     text = re.sub(r'\s+', ' ', text).strip()
     return text
+
+def check_english(sentence):
+    sentence = [lemmatizer.lemmatize(word) for word in word_tokenize(sentence.lower()) if word not in punct]
+    bools = [word in words.words() for word in sentence]
+    return (sum(bools) / len(bools)) > 0.5
 
 def check_grammar(user_input):
     doc = nlp(user_input)
@@ -96,22 +101,24 @@ def lemmatize_with_pos(token):
 
 
 def evaluate_answer(self):
+    user_input_cleaned = clean_input(self.frame.user_answer[-1].lower())
+    correct_answer_cleaned = clean_input(self.frame.correct_answer.lower())
+    is_english = check_english(user_input_cleaned)
 
-    if self.frame.retries > 0 and self.frame.user_answer[-1] == self.frame.user_answer[-2]:
+    if len(self.frame.user_answer) > 1 and self.frame.user_answer[-1] == self.frame.user_answer[-2]:
         return {
-            "same_answer": True
+            "same_answer": True,
+            "is_english": is_english,
         }
 
     if self.frame.questions_type == 'list':
        keyword_similarity = keyword_match(self.frame.user_answer[-1], self.frame.keywords)
        return {
            "final_similarity": keyword_similarity,
+           "is_english": is_english,
            "check_grammar": True,
            "same_answer": False
          }
-
-    user_input_cleaned = clean_input(self.frame.user_answer[-1].lower())
-    correct_answer_cleaned = clean_input(self.frame.correct_answer.lower())
 
     semantic_similarity = calculate_semantic_similarity(user_input_cleaned, correct_answer_cleaned)
     #print(semantic_similarity)
@@ -128,5 +135,6 @@ def evaluate_answer(self):
         "semantic_similarity": semantic_similarity,
         "syntactic_similarity": syntactic_similarity,
         "final_similarity": final_similarity,
+        "is_english": is_english,
         "check_grammar": check_grammar(user_input_cleaned) if self.frame.questions_type == 'definition' else True
     }
