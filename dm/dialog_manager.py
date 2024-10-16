@@ -1,5 +1,5 @@
 from analysis.language_understanding import evaluate_answer
-from generation.response_generation import greetings, intro, grammar_not_valid, response_correct, next_question, \
+from generation.response_generation import greetings, intro, grammar_not_valid, correct_response, next_question, \
     partial_correct_response, try_again, no_more_retries, incorrect_response, same_answer
 from dm.frames import Frame
 from db.tln_dictionary import questions
@@ -29,44 +29,40 @@ class DialogManager:
         return None
 
     def process_answer(self, user_input):
-        # Valuta la risposta dell'utente
         self.frame.user_answer.append(user_input)
         evaluation = evaluate_answer(self)
 
         if evaluation["same_answer"]:
             return same_answer()
 
-        # Se la risposta è grammaticalmente errata
         if not evaluation["check_grammar"]:
             return grammar_not_valid()
 
-        # Se la risposta è corretta
         if evaluation["final_similarity"] >= 0.8:
             self.scores.append(self.current_question_score)  # Punteggio pieno
             self.frame.retries = 0
             self.current_question_index += 1
             self.current_question_score = 30  # Reset del punteggio
             if self.current_question_index == len(self.frame.questions):
-                return response_correct()
+                return correct_response()
             else:
-                return response_correct() + " " + next_question()
+                return correct_response() + " " + next_question()
 
-        # Se la risposta è parzialmente errata
         self.frame.retries += 1
         if  (0.6 <= evaluation["final_similarity"] < 0.8 and self.frame.questions_type == 'definition') or (evaluation["final_similarity"] > 0 and self.frame.questions_type == 'list'):
-            self.current_question_score -= 3 * self.frame.retries  # Penalità progressiva
-            if self.frame.retries == 2:  # Troppi tentativi
-                self.scores.append(self.current_question_score)  # Valuta la risposta corrente
+            self.current_question_score -= 3 * self.frame.retries
+            if self.frame.retries == 2:
+                self.scores.append(self.current_question_score)
                 self.current_question_index += 1
                 self.frame.retries = 0
                 self.current_question_score = 30
                 return partial_correct_response() + " " + no_more_retries()
             else:
                 return partial_correct_response() + " " + try_again() if self.current_question_index < len(self.frame.questions) else partial_correct_response()
-        else:  # Risposta errata
-            self.current_question_score -= 6 * self.frame.retries  # Penalità progressiva
-            if self.frame.retries == 2:  # Troppi tentativi
-                self.scores.append(self.current_question_score)  # Valuta la risposta corrente
+        else:
+            self.current_question_score -= 6 * self.frame.retries
+            if self.frame.retries == 2:
+                self.scores.append(self.current_question_score)
                 self.current_question_index += 1
                 self.frame.retries = 0
                 self.current_question_score = 30

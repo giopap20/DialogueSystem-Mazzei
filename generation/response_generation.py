@@ -66,15 +66,14 @@ def grammar_not_valid():
 
     return output
 
-def response_correct():
-    # Crea la prima frase: "Great! Your answer is correct."
+def correct_response():
+
     subj_1 = nlg_factory.createNounPhrase("your", "answer")
     verb_1 = nlg_factory.createVerbPhrase("be")
     obj_1 = nlg_factory.createNounPhrase("correct")
     s_1 = nlg_factory.createClause(subj_1, verb_1, obj_1)
     s_1.setFrontModifier("Great!")
 
-    # Crea la seconda frase: "Well done! You gave the right answer."
     subj_2 = nlg_factory.createNounPhrase("you")
     verb_2 = nlg_factory.createVerbPhrase("give")
     verb_2.setFeature(nlg.Feature.TENSE, nlg.Tense.PAST)
@@ -82,7 +81,6 @@ def response_correct():
     s_2 = nlg_factory.createClause(subj_2, verb_2, obj_2)
     s_2.setFrontModifier("Well done!")
 
-    # Crea la terza frase: "Correct! You did a great job."
     subj_3 = nlg_factory.createNounPhrase("you")
     verb_3 = nlg_factory.createVerbPhrase("do")
     verb_3.setFeature(nlg.Feature.TENSE, nlg.Tense.PAST)
@@ -90,21 +88,19 @@ def response_correct():
     s_3 = nlg_factory.createClause(subj_3, verb_3, obj_3)
     s_3.setFrontModifier("Correct!")
 
-    # Crea la quarta frase: "Yes, that's the right answer!"
     subj_4 = nlg_factory.createNounPhrase("that")
     verb_4 = nlg_factory.createVerbPhrase("be")
     obj_4 = nlg_factory.createNounPhrase("the right", "answer")
     s_4 = nlg_factory.createClause(subj_4, verb_4, obj_4)
     s_4.setFrontModifier("Yes,")
 
-    # Lista di tutte le frasi
     sentences = [
         realiser.realiseSentence(s_1),
         realiser.realiseSentence(s_2),
         realiser.realiseSentence(s_3),
         realiser.realiseSentence(s_4)
     ]
-    # Seleziona una frase casualmente
+
     return random.choice(sentences)
 
 
@@ -149,12 +145,10 @@ def partial_correct_response():
 
 
 def incorrect_response():
-
     subj_1 = nlg_factory.createNounPhrase("your", "answer")
     verb_1 = nlg_factory.createVerbPhrase("be")
     obj_1 = nlg_factory.createNounPhrase("incorrect")
     s_1 = nlg_factory.createClause(subj_1, verb_1, obj_1)
-
 
     subj_2 = nlg_factory.createNounPhrase("that")
     verb_2 = nlg_factory.createVerbPhrase("be")
@@ -162,13 +156,11 @@ def incorrect_response():
     s_2 = nlg_factory.createClause(subj_2, verb_2, obj_2)
     s_2.setFrontModifier("Unfortunately")
 
-
     subj_3 = nlg_factory.createNounPhrase("that")
     verb_3 = nlg_factory.createVerbPhrase("be")
     obj_3 = nlg_factory.createNounPhrase("wrong")
     s_3 = nlg_factory.createClause(subj_3, verb_3, obj_3)
     s_3.setFrontModifier("I'm sorry, but")
-
 
     subj_4 = nlg_factory.createNounPhrase("that")
     verb_4 = nlg_factory.createVerbPhrase("be")
@@ -176,7 +168,6 @@ def incorrect_response():
     s_4 = nlg_factory.createClause(subj_4, verb_4, obj_4)
     s_4.setFrontModifier("No")
 
-    # Lista di tutte le frasi
     sentences = [
         realiser.realiseSentence(s_1),
         realiser.realiseSentence(s_2),
@@ -184,7 +175,6 @@ def incorrect_response():
         realiser.realiseSentence(s_4)
     ]
 
-    # Seleziona una frase casualmente
     return random.choice(sentences)
 
 
@@ -218,10 +208,8 @@ def passed_exam():
     verb_1.addComplement("well")
     s_1 = nlg_factory.createClause(subj_1, verb_1)
 
-
     subj_2 = nlg_factory.createNounPhrase("you")
     verb_2 = nlg_factory.createVerbPhrase("can")
-
 
     aim_verb = nlg_factory.createVerbPhrase("aim")
     aim_verb.setFeature(Feature.FORM, "base")
@@ -255,11 +243,9 @@ def best_exam():
     obj_1 = nlg_factory.createNounPhrase("some", "thesis projects")
     s_1 = nlg_factory.createClause(subj_1, verb_1, obj_1)
 
-    # Aggiungere la frase preposizionale "for you"
     prep = nlg_factory.createPrepositionPhrase("for", "you")
     s_1.addPostModifier(prep)
 
-    # Realizzare la frase finale
     return realiser.realiseSentence(s_1)
 
 

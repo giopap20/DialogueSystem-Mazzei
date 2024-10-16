@@ -32,8 +32,7 @@ questions = {
             'keywords': ["process", "text", "smaller unit", "token"]
         },
         "Which are NLG tasks?": {
-            'correct_answer': "content determination, discourse planning, sentence aggregation, lexicalization,"
-                              "referring expression generation, orthographic realization, syntactic realization, morphological realization",
+            'correct_answer': "content determination, discourse planning, sentence aggregation, lexicalization, referring expression generation, orthographic realization, syntactic realization, morphological realization",
             'type': "list",
             'keywords': ["content determination", "discourse planning", "sentence aggregation"]
         },
