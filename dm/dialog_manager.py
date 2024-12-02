@@ -59,7 +59,7 @@ class DialogManager:
                 self.current_question_index += 1
                 self.frame.retries = 0
                 self.current_question_score = 30
-                return partial_correct_response() + " " + no_more_retries()
+                return partial_correct_response() + " " + no_more_retries() if self.current_question_index < len(self.frame.questions) else partial_correct_response()
             else:
                 return partial_correct_response() + " " + try_again() if self.current_question_index < len(self.frame.questions) else partial_correct_response()
         else:
@@ -69,7 +69,7 @@ class DialogManager:
                 self.current_question_index += 1
                 self.frame.retries = 0
                 self.current_question_score = 30
-                return incorrect_response() + " " + no_more_retries()
+                return incorrect_response() + " " + no_more_retries() if self.current_question_index < len(self.frame.questions) else incorrect_response()
 
         return incorrect_response() + " " + try_again() if self.current_question_index < len(self.frame.questions) else incorrect_response()
 

@@ -34,7 +34,7 @@ questions = {
         "Which are NLG tasks?": {
             'correct_answer': "content determination, discourse planning, sentence aggregation, lexicalization, referring expression generation, orthographic realization, syntactic realization, morphological realization",
             'type': "list",
-            'keywords': ["content determination", "discourse planning", "sentence aggregation"]
+            'keywords': ["content determination", "discourse planning", "sentence aggregation", "lexicalization", "referring expression generation", "orthographic realization", "syntactic realization", "morphological realization"]
         },
         "What are the 6 remarkable phenomena of human dialogue?": {
             'correct_answer': "turns, speech acts, grounding, dialogue structure, initiative, implicature",
