@@ -1,4 +1,4 @@
-##Progetto d'esame TLN parte 1: DialogueSystem Danny##
+#Progetto d'esame TLN parte 1: DialogueSystem Danny#
 
 
 Il DS (ITA o ENG) deve impersonare il personaggio 
